@@ -1,0 +1,15 @@
+# Downloaded model weights
+*.gguf
+*.safetensors
+models/
+
+# Machine-local state and evidence
+run/
+acceptance/
+docs/plans/
+config.local.env
+
+# Build/editor noise
+.DS_Store
+*.swp
+*.tmp
