@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DeepSeek V4 Local Console</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main class="shell">
+    <section class="workspace">
+      <header class="topbar">
+        <div>
+          <h1>DeepSeek V4 Flash</h1>
+          <p id="endpoint">127.0.0.1:8000 · SSD streaming</p>
+        </div>
+        <div class="status" id="status">Checking</div>
+      </header>
+
+      <form id="chatForm" class="composer">
+        <textarea id="prompt" spellcheck="false">Reply with a short note about SSD expert streaming.</textarea>
+        <div class="controls">
+          <label>
+            Mode
+            <select id="reasoning">
+              <option value="none">Direct</option>
+              <option value="low">Thinking</option>
+            </select>
+          </label>
+          <label>
+            Max tokens
+            <input id="maxTokens" type="number" min="1" max="2048" value="256">
+          </label>
+          <button id="sendButton" type="submit">Run</button>
+        </div>
+      </form>
+
+      <section class="answer">
+        <div class="answerHeader">
+          <h2>Output</h2>
+          <span id="lastRun">No run yet</span>
+        </div>
+        <pre id="output"></pre>
+      </section>
+    </section>
+
+    <aside class="metrics">
+      <section>
+        <h2>Throughput</h2>
+        <div class="primaryMetric">
+          <span id="tokps">-</span>
+          <small>tok/s</small>
+        </div>
+        <dl>
+          <div><dt>Generated</dt><dd id="tokens">-</dd></div>
+          <div><dt>Latency</dt><dd id="latency">-</dd></div>
+        </dl>
+      </section>
+
+      <section>
+        <h2>Process</h2>
+        <dl>
+          <div><dt>PID</dt><dd id="pid">-</dd></div>
+          <div><dt>RSS</dt><dd id="rss">-</dd></div>
+          <div><dt>CPU</dt><dd id="cpu">-</dd></div>
+        </dl>
+      </section>
+
+      <section>
+        <h2>System</h2>
+        <dl>
+          <div><dt>Free memory</dt><dd id="freeMem">-</dd></div>
+          <div><dt>Swap used</dt><dd id="swap">-</dd></div>
+          <div><dt>Disk free</dt><dd id="disk">-</dd></div>
+        </dl>
+      </section>
+
+      <section>
+        <h2>Model</h2>
+        <dl>
+          <div><dt>Expert budget</dt><dd id="expertBudget">-</dd></div>
+          <div><dt>Context</dt><dd id="ctx">-</dd></div>
+        </dl>
+      </section>
+    </aside>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>

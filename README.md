@@ -60,6 +60,17 @@ and runs real API smoke tests.
 ./bin/start.sh
 ```
 
+Optional browser console:
+
+```sh
+./bin/dashboard-start.sh
+open http://127.0.0.1:8791
+```
+
+The console can send prompts, show the latest tokens/second, and display the
+current ds4 process RSS, CPU, swap, free memory, disk space, expert budget, and
+context size.
+
 The service:
 
 - starts automatically after login;
