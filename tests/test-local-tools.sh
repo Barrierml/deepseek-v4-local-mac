@@ -10,13 +10,20 @@ fail() {
     exit 1
 }
 
-for file in config.env bin/download-model.sh bin/verify-model.sh bin/install-launch-agent.sh bin/start.sh bin/stop.sh bin/status.sh bin/smoke-test.sh bin/acceptance-test.sh; do
+for file in config.env bin/download-model.sh bin/verify-model.sh bin/install-launch-agent.sh bin/start.sh bin/stop.sh bin/status.sh bin/smoke-test.sh bin/tool-call-test.sh bin/acceptance-test.sh; do
     [ -f "$ROOT/$file" ] || fail "$file is missing"
 done
 
-for file in bin/download-model.sh bin/verify-model.sh bin/install-launch-agent.sh bin/start.sh bin/stop.sh bin/status.sh bin/smoke-test.sh bin/acceptance-test.sh; do
+for file in bin/download-model.sh bin/verify-model.sh bin/install-launch-agent.sh bin/start.sh bin/stop.sh bin/status.sh bin/smoke-test.sh bin/tool-call-test.sh bin/acceptance-test.sh; do
     [ -x "$ROOT/$file" ] || fail "$file is not executable"
 done
+
+grep -q '"tools"' "$ROOT/bin/tool-call-test.sh" ||
+    fail "tool-call test does not send OpenAI tools"
+grep -q 'tool_calls' "$ROOT/bin/tool-call-test.sh" ||
+    fail "tool-call test does not assert returned tool_calls"
+grep -q 'tool_choice' "$ROOT/bin/tool-call-test.sh" ||
+    fail "tool-call test does not cover tool_choice"
 
 grep -q 'LAUNCH_MODE:=launchd' "$ROOT/config.env" ||
     fail "production config does not use launchd"

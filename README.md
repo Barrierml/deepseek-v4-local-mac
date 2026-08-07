@@ -138,6 +138,7 @@ swap pressure.
 sh -n bin/*.sh tests/*.sh config.env
 ./tests/test-local-tools.sh
 ./tests/test-public-repo.sh
+./bin/tool-call-test.sh
 ./bin/acceptance-test.sh
 ```
 
@@ -150,6 +151,9 @@ sh -n bin/*.sh tests/*.sh config.env
 5. stop/restart and a second generation pass;
 6. LaunchAgent and PID 1 ownership checks.
 7. Dashboard API and browser chat checks, including KV cache counters.
+
+`tool-call-test.sh` separately exercises OpenAI-compatible function calling:
+structured `tool_calls`, tool-result replay, and `tool_choice: "none"`.
 
 Runtime logs, PIDs, model verification stamps, generated reports, and responses
 stay under ignored directories.
