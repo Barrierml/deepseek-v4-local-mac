@@ -54,6 +54,21 @@
         </dl>
       </section>
 
+      <section class="expertActivity">
+        <div class="sectionHeader">
+          <h2>Expert Cache Activity</h2>
+          <span id="activityMode">Observed</span>
+        </div>
+        <div class="activityGrid" id="expertNodes" aria-label="Expert cache activity"></div>
+        <dl>
+          <div><dt>Active requests</dt><dd id="activeRequests">-</dd></div>
+          <div><dt>Last cache read</dt><dd id="lastCacheRead">-</dd></div>
+          <div><dt>Last cache write</dt><dd id="lastCacheWrite">-</dd></div>
+          <div><dt>Cache pressure</dt><dd id="cachePressure">-</dd></div>
+        </dl>
+        <p id="activityHint">Exact expert IDs are not exposed by ds4 HTTP; lanes show observed cache and process activity.</p>
+      </section>
+
       <section>
         <h2>Process</h2>
         <dl>

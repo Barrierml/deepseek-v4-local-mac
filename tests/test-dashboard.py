@@ -94,6 +94,61 @@ class DashboardTests(unittest.TestCase):
         self.assertEqual(result["cached_tokens"], 7)
         self.assertEqual(result["cache_write_tokens"], 5)
 
+    def test_openai_sse_parser_emits_deltas_and_final_usage(self):
+        server = load_server()
+        lines = [
+            b'data: {"choices":[{"delta":{"role":"assistant"}}]}\n',
+            b'data: {"choices":[{"delta":{"content":"hel"}}]}\n',
+            b'data: {"choices":[{"delta":{"content":"lo"}}]}\n',
+            b'data: {"choices":[],"usage":{"completion_tokens":2,"prompt_tokens_details":{"cached_tokens":9,"cache_write_tokens":4}}}\n',
+            b"data: [DONE]\n",
+        ]
+
+        events = list(server.parse_openai_sse(lines, elapsed_s=2.0))
+
+        self.assertEqual(
+            events,
+            [
+                {"type": "delta", "content": "hel"},
+                {"type": "delta", "content": "lo"},
+                {
+                    "type": "done",
+                    "elapsed_s": 2.0,
+                    "tokens": 2,
+                    "tok_per_s": 1.0,
+                    "cached_tokens": 9,
+                    "cache_write_tokens": 4,
+                    "raw_usage": {
+                        "completion_tokens": 2,
+                        "prompt_tokens_details": {"cached_tokens": 9, "cache_write_tokens": 4},
+                    },
+                },
+            ],
+        )
+
+    def test_status_events_include_stats_and_cache_activity(self):
+        server = load_server()
+        fake_stats = {
+            "server": {"pid": 1234, "rss_gib": 28.5, "cpu_percent": 41.0, "mem_percent": 70.0},
+            "system": {"memory_free_percent": 35, "swap": {"used_gib": 1.0}, "disk": {"available_gib": 100}},
+            "model": {"expert_budget_gib": 24.0, "ctx": 16384, "base_url": "http://127.0.0.1:8000"},
+            "ts": 10.0,
+        }
+
+        with mock.patch.object(server, "collect_stats", return_value=fake_stats):
+            with mock.patch.object(server.time, "time", return_value=20.0):
+                server.note_chat_done({"tokens": 12, "tok_per_s": 6.0, "cached_tokens": 9, "cache_write_tokens": 4})
+                event = server.status_event()
+
+        self.assertEqual(event["type"], "status")
+        self.assertEqual(event["stats"], fake_stats)
+        self.assertFalse(event["expert_cache"]["exact_events"])
+        self.assertEqual(event["expert_cache"]["source"], "openai_usage_and_process_stats")
+        self.assertEqual(event["expert_cache"]["last_cached_tokens"], 9)
+        self.assertEqual(event["expert_cache"]["last_cache_write_tokens"], 4)
+        self.assertGreaterEqual(len(event["expert_cache"]["nodes"]), 12)
+        self.assertIn("write", {node["state"] for node in event["expert_cache"]["nodes"]})
+
     def test_static_index_references_dashboard_apis(self):
         html = (ROOT / "web" / "index.html").read_text()
         js = (ROOT / "web" / "app.js").read_text()
@@ -102,8 +157,14 @@ class DashboardTests(unittest.TestCase):
         self.assertIn("resetButton", html)
         self.assertIn("/api/stats", js)
         self.assertIn("/api/chat", js)
+        self.assertIn("/api/chat-stream", js)
+        self.assertIn("/api/status-stream", js)
+        self.assertIn("expertNodes", html)
+        self.assertIn("previousExpertStates", js)
+        self.assertIn("transition", js)
         self.assertIn("conversation", js)
         self.assertIn("cached_tokens", js)
+        self.assertIn("getReader", js)
 
 
 if __name__ == "__main__":

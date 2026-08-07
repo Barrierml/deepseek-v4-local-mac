@@ -69,9 +69,16 @@ open http://127.0.0.1:8791
 
 The console keeps a browser-local `messages` conversation and sends the full
 message list on every turn. This lets ds4 reuse matching live KV prefixes across
-turns. It also shows the latest tokens/second, generated tokens, latency,
-`cached_tokens`, `cache_write_tokens`, process RSS, CPU, swap, free memory, disk
-space, expert budget, and context size.
+turns. Model output is streamed to the browser as tokens arrive; tokens/second
+is calculated only from the final usage event.
+
+Dashboard status is delivered through a separate `/api/status-stream`
+subscription. It shows the latest generated tokens, latency, `cached_tokens`,
+`cache_write_tokens`, process RSS, CPU, swap, free memory, disk space, expert
+budget, context size, and an expert-cache activity panel. ds4 does not expose
+exact expert IDs through HTTP, so that panel uses observable cache usage and
+process activity to show cache-lane enter/write/leave pulses instead of
+pretending to know exact expert nodes.
 
 The service:
 

@@ -186,6 +186,74 @@ button:disabled {
   padding: 14px;
 }
 
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.sectionHeader span {
+  flex: none;
+  padding: 3px 7px;
+  border: 1px solid #cfd8e3;
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.activityGrid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 6px;
+  margin-top: 12px;
+  min-height: 46px;
+}
+
+.expertNode {
+  height: 20px;
+  border-radius: 5px;
+  border: 1px solid #dbe3ec;
+  background: #eef3f7;
+  opacity: calc(0.42 + var(--strength, 0) * 0.58);
+  transition: background 160ms ease, opacity 160ms ease, transform 160ms ease;
+}
+
+.expertNode.active {
+  background: #d9ecf3;
+  border-color: #a7ccd9;
+}
+
+.expertNode.read {
+  background: #dff3e9;
+  border-color: #9bcdb4;
+}
+
+.expertNode.write {
+  background: #fff0cf;
+  border-color: #dfbf72;
+  transform: translateY(-1px);
+}
+
+.expertNode.enter {
+  box-shadow: 0 0 0 3px rgba(23, 107, 135, 0.14);
+  transform: translateY(-2px) scale(1.04);
+}
+
+.expertNode.leave {
+  background: #f4e9dc;
+  border-color: #d8c7b2;
+  transform: translateY(1px) scale(0.96);
+}
+
+#activityHint {
+  margin-top: 10px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
 .primaryMetric {
   display: flex;
   align-items: baseline;
