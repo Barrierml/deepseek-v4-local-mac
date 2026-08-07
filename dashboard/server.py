@@ -118,10 +118,32 @@ def collect_stats():
     }
 
 
-def send_chat(prompt, max_tokens=256, reasoning_effort="none"):
+def normalize_messages(value):
+    if isinstance(value, list):
+        out = []
+        for item in value:
+            if not isinstance(item, dict):
+                raise ValueError("message must be an object")
+            role = item.get("role")
+            content = item.get("content")
+            if role not in ("system", "user", "assistant", "tool"):
+                raise ValueError("unsupported message role")
+            if not isinstance(content, str) or not content.strip():
+                raise ValueError("message content must be non-empty text")
+            out.append({"role": role, "content": content})
+        if not out:
+            raise ValueError("messages cannot be empty")
+        return out
+    prompt = str(value or "")
+    if not prompt.strip():
+        raise ValueError("empty prompt")
+    return [{"role": "user", "content": prompt}]
+
+
+def send_chat(messages, max_tokens=256, reasoning_effort="none"):
     payload = {
         "model": "deepseek-v4-flash",
-        "messages": [{"role": "user", "content": prompt}],
+        "messages": normalize_messages(messages),
         "max_tokens": int(max_tokens),
         "temperature": 0,
         "reasoning_effort": reasoning_effort,
@@ -139,12 +161,15 @@ def send_chat(prompt, max_tokens=256, reasoning_effort="none"):
     elapsed = max(time.perf_counter() - start, 0.001)
     content = data["choices"][0]["message"].get("content") or ""
     usage = data.get("usage") or {}
+    details = usage.get("prompt_tokens_details") or {}
     tokens = int(usage.get("completion_tokens") or max(1, len(content.split())))
     return {
         "content": content,
         "elapsed_s": round(elapsed, 3),
         "tokens": tokens,
         "tok_per_s": round(tokens / elapsed, 2),
+        "cached_tokens": int(details.get("cached_tokens") or 0),
+        "cache_write_tokens": int(details.get("cache_write_tokens") or 0),
         "raw_usage": usage,
     }
 
@@ -190,11 +215,11 @@ class Handler(BaseHTTPRequestHandler):
         length = int(self.headers.get("Content-Length") or 0)
         try:
             data = json.loads(self.rfile.read(length) or b"{}")
-            prompt = str(data.get("prompt") or "")
-            if not prompt.strip():
-                raise ValueError("empty prompt")
+            messages = data.get("messages")
+            if messages is None:
+                messages = data.get("prompt")
             result = send_chat(
-                prompt,
+                messages,
                 max_tokens=int(data.get("max_tokens") or 256),
                 reasoning_effort=str(data.get("reasoning_effort") or "none"),
             )

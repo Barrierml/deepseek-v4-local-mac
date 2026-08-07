@@ -17,8 +17,10 @@
         <div class="status" id="status">Checking</div>
       </header>
 
+      <section class="messages" id="messages" aria-label="Conversation"></section>
+
       <form id="chatForm" class="composer">
-        <textarea id="prompt" spellcheck="false">Reply with a short note about SSD expert streaming.</textarea>
+        <textarea id="prompt" spellcheck="false" placeholder="Send a message">Reply with a short note about SSD expert streaming.</textarea>
         <div class="controls">
           <label>
             Mode
@@ -31,17 +33,10 @@
             Max tokens
             <input id="maxTokens" type="number" min="1" max="2048" value="256">
           </label>
+          <button id="resetButton" type="button" class="secondary">Reset</button>
           <button id="sendButton" type="submit">Run</button>
         </div>
       </form>
-
-      <section class="answer">
-        <div class="answerHeader">
-          <h2>Output</h2>
-          <span id="lastRun">No run yet</span>
-        </div>
-        <pre id="output"></pre>
-      </section>
     </section>
 
     <aside class="metrics">
@@ -54,6 +49,8 @@
         <dl>
           <div><dt>Generated</dt><dd id="tokens">-</dd></div>
           <div><dt>Latency</dt><dd id="latency">-</dd></div>
+          <div><dt>KV read</dt><dd id="cachedTokens">-</dd></div>
+          <div><dt>KV write</dt><dd id="cacheWriteTokens">-</dd></div>
         </dl>
       </section>
 

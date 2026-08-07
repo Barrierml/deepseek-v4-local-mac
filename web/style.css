@@ -28,10 +28,11 @@ body {
 
 .workspace {
   display: grid;
-  grid-template-rows: auto minmax(260px, 42vh) minmax(260px, 1fr);
+  grid-template-rows: auto minmax(320px, 1fr) minmax(220px, 34vh);
   gap: 16px;
   padding: 24px;
   min-width: 0;
+  min-height: 100vh;
 }
 
 .topbar {
@@ -62,10 +63,52 @@ p, small, dt { color: var(--muted); }
   background: #f0fbf6;
 }
 
-.composer, .answer, .metrics section {
+.composer, .messages, .metrics section {
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 8px;
+}
+
+.messages {
+  min-height: 0;
+  overflow: auto;
+  padding: 18px;
+}
+
+.emptyState {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.message {
+  display: grid;
+  gap: 6px;
+  max-width: 820px;
+  margin-bottom: 16px;
+}
+
+.message.user {
+  margin-left: auto;
+}
+
+.role {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.messageText {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px 14px;
+  background: #f9fbfd;
+  white-space: pre-wrap;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.message.user .messageText {
+  background: #eef8fb;
+  border-color: #c4dfe8;
 }
 
 .composer {
@@ -120,36 +163,14 @@ button {
   cursor: pointer;
 }
 
+button.secondary {
+  background: #e6edf2;
+  color: var(--accent-strong);
+}
+
 button:disabled {
   cursor: wait;
   background: #8aa8b5;
-}
-
-.answer {
-  min-height: 0;
-  overflow: hidden;
-}
-
-.answerHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 14px;
-  border-bottom: 1px solid var(--line);
-}
-
-#lastRun {
-  color: var(--muted);
-  font-size: 12px;
-}
-
-pre {
-  margin: 0;
-  padding: 18px;
-  height: calc(100% - 45px);
-  overflow: auto;
-  white-space: pre-wrap;
-  font: 14px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 .metrics {

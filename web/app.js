@@ -1,6 +1,7 @@
 const $ = (id) => document.getElementById(id);
 
 let lastTokPerSecond = null;
+let conversation = [];
 
 function setText(id, value) {
   $(id).textContent = value == null || value === "" ? "-" : String(value);
@@ -8,6 +9,31 @@ function setText(id, value) {
 
 function fmtGiB(value) {
   return value == null ? "-" : `${Number(value).toFixed(2)} GiB`;
+}
+
+function renderConversation() {
+  const root = $("messages");
+  root.innerHTML = "";
+  if (conversation.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "emptyState";
+    empty.textContent = "No messages yet";
+    root.appendChild(empty);
+    return;
+  }
+  for (const message of conversation) {
+    const row = document.createElement("article");
+    row.className = `message ${message.role}`;
+    const role = document.createElement("div");
+    role.className = "role";
+    role.textContent = message.role === "assistant" ? "Assistant" : "You";
+    const content = document.createElement("div");
+    content.className = "messageText";
+    content.textContent = message.content;
+    row.append(role, content);
+    root.appendChild(row);
+  }
+  root.scrollTop = root.scrollHeight;
 }
 
 async function fetchJson(url, options) {
@@ -44,16 +70,19 @@ async function refreshStats() {
 async function runPrompt(event) {
   event.preventDefault();
   const button = $("sendButton");
+  const prompt = $("prompt").value.trim();
+  if (!prompt) return;
   button.disabled = true;
-  $("output").textContent = "";
-  $("lastRun").textContent = "Running";
+  conversation.push({ role: "user", content: prompt });
+  renderConversation();
+  $("prompt").value = "";
   const started = new Date();
   try {
     const result = await fetchJson("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        prompt: $("prompt").value,
+        messages: conversation,
         max_tokens: Number($("maxTokens").value || 256),
         reasoning_effort: $("reasoning").value,
       }),
@@ -62,12 +91,14 @@ async function runPrompt(event) {
     setText("tokps", result.tok_per_s.toFixed(2));
     setText("tokens", result.tokens);
     setText("latency", `${result.elapsed_s.toFixed(2)} s`);
-    $("output").textContent = result.content;
-    $("lastRun").textContent = started.toLocaleTimeString();
+    setText("cachedTokens", result.cached_tokens);
+    setText("cacheWriteTokens", result.cache_write_tokens);
+    conversation.push({ role: "assistant", content: result.content });
+    renderConversation();
     renderStats(result.stats);
   } catch (error) {
-    $("output").textContent = error.message;
-    $("lastRun").textContent = "Failed";
+    conversation.push({ role: "assistant", content: `Error: ${error.message}` });
+    renderConversation();
   } finally {
     button.disabled = false;
     await refreshStats();
@@ -75,5 +106,16 @@ async function runPrompt(event) {
 }
 
 $("chatForm").addEventListener("submit", runPrompt);
+$("resetButton").addEventListener("click", () => {
+  conversation = [];
+  lastTokPerSecond = null;
+  setText("tokps", "-");
+  setText("tokens", "-");
+  setText("latency", "-");
+  setText("cachedTokens", "-");
+  setText("cacheWriteTokens", "-");
+  renderConversation();
+});
+renderConversation();
 refreshStats();
 setInterval(refreshStats, 2000);

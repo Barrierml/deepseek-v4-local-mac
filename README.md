@@ -60,16 +60,18 @@ and runs real API smoke tests.
 ./bin/start.sh
 ```
 
-Optional browser console:
+Optional browser chat console:
 
 ```sh
 ./bin/dashboard-start.sh
 open http://127.0.0.1:8791
 ```
 
-The console can send prompts, show the latest tokens/second, and display the
-current ds4 process RSS, CPU, swap, free memory, disk space, expert budget, and
-context size.
+The console keeps a browser-local `messages` conversation and sends the full
+message list on every turn. This lets ds4 reuse matching live KV prefixes across
+turns. It also shows the latest tokens/second, generated tokens, latency,
+`cached_tokens`, `cache_write_tokens`, process RSS, CPU, swap, free memory, disk
+space, expert budget, and context size.
 
 The service:
 
@@ -140,6 +142,7 @@ sh -n bin/*.sh tests/*.sh config.env
 4. direct, thinking, and SSE API generation;
 5. stop/restart and a second generation pass;
 6. LaunchAgent and PID 1 ownership checks.
+7. Dashboard API and browser chat checks, including KV cache counters.
 
 Runtime logs, PIDs, model verification stamps, generated reports, and responses
 stay under ignored directories.
