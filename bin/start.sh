@@ -11,6 +11,11 @@ ROOT=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
 }
 
 mkdir -p "$STATE_DIR"
+kv_args=
+if [ -n "$KV_DISK_DIR" ]; then
+    mkdir -p "$KV_DISK_DIR"
+    kv_args="--kv-disk-dir $KV_DISK_DIR --kv-disk-space-mb $KV_DISK_SPACE_MB --kv-cache-min-tokens $KV_CACHE_MIN_TOKENS --kv-cache-cold-max-tokens $KV_CACHE_COLD_MAX_TOKENS --kv-cache-continued-interval-tokens $KV_CACHE_CONTINUED_INTERVAL_TOKENS --kv-cache-boundary-trim-tokens $KV_CACHE_BOUNDARY_TRIM_TOKENS --kv-cache-boundary-align-tokens $KV_CACHE_BOUNDARY_ALIGN_TOKENS"
+fi
 if [ "$LAUNCH_MODE" = launchd ]; then
     if launchctl print "gui/$(id -u)/$LAUNCH_LABEL" >/dev/null 2>&1 &&
         curl -fsS "http://$SERVER_HOST:$SERVER_PORT/v1/models" >/dev/null 2>&1; then
@@ -61,7 +66,8 @@ fi
         --ctx "$SERVER_CTX" \
         --tokens "$SERVER_TOKENS" \
         --host "$SERVER_HOST" \
-        --port "$SERVER_PORT"
+        --port "$SERVER_PORT" \
+        $kv_args
 ) >>"$LOG_FILE" 2>&1 &
 server_pid=$!
 printf '%s\n' "$server_pid" >"$PID_FILE"

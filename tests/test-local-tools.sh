@@ -10,11 +10,11 @@ fail() {
     exit 1
 }
 
-for file in config.env bin/download-model.sh bin/verify-model.sh bin/install-launch-agent.sh bin/start.sh bin/stop.sh bin/status.sh bin/smoke-test.sh bin/tool-call-test.sh bin/acceptance-test.sh; do
+for file in config.env bin/download-model.sh bin/verify-model.sh bin/install-launch-agent.sh bin/start.sh bin/stop.sh bin/status.sh bin/smoke-test.sh bin/tool-call-test.sh bin/acceptance-test.sh bin/openai-request-log-proxy.py; do
     [ -f "$ROOT/$file" ] || fail "$file is missing"
 done
 
-for file in bin/download-model.sh bin/verify-model.sh bin/install-launch-agent.sh bin/start.sh bin/stop.sh bin/status.sh bin/smoke-test.sh bin/tool-call-test.sh bin/acceptance-test.sh; do
+for file in bin/download-model.sh bin/verify-model.sh bin/install-launch-agent.sh bin/start.sh bin/stop.sh bin/status.sh bin/smoke-test.sh bin/tool-call-test.sh bin/acceptance-test.sh bin/openai-request-log-proxy.py; do
     [ -x "$ROOT/$file" ] || fail "$file is not executable"
 done
 
@@ -35,6 +35,10 @@ plutil -lint "$PLIST_PATH" >/dev/null ||
     fail "generated LaunchAgent plist is invalid"
 grep -q '<string>--ssd-streaming</string>' "$PLIST_PATH" ||
     fail "generated LaunchAgent does not enable SSD streaming"
+KV_DISK_DIR="$TMP/kv-cache" PLIST_PATH="$PLIST_PATH" PLIST_ONLY=1 LAUNCH_LABEL=ai.deepseek-v4-local.test \
+    "$ROOT/bin/install-launch-agent.sh" >/dev/null
+grep -q '<string>--kv-disk-dir</string>' "$PLIST_PATH" ||
+    fail "generated LaunchAgent does not include KV disk cache when configured"
 grep -q 'launchctl print.*LAUNCH_LABEL' "$ROOT/bin/start.sh" ||
     fail "start does not detect an already-loaded LaunchAgent"
 grep -q 'cmp -s.*PLIST_PATH' "$ROOT/bin/install-launch-agent.sh" ||

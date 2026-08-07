@@ -86,6 +86,43 @@ The service:
 - restarts after an unexpected exit;
 - survives terminal or agent-session shutdown.
 
+### Disk KV Cache
+
+ds4 can persist reusable prompt prefixes to disk. This is useful for coding
+agents because their system prompt and tool schemas are often identical across
+requests. Enable it in `config.local.env`:
+
+```sh
+KV_DISK_DIR=$PWD/run/ds4-kv-cache
+KV_DISK_SPACE_MB=8192
+KV_CACHE_MIN_TOKENS=256
+KV_CACHE_BOUNDARY_TRIM_TOKENS=16
+KV_CACHE_BOUNDARY_ALIGN_TOKENS=256
+```
+
+Then reinstall/restart the service:
+
+```sh
+./bin/stop.sh
+./bin/start.sh
+```
+
+The server log should include `KV disk cache ...`. Later responses report
+cache reuse through `prompt_tokens_details.cached_tokens`.
+
+### Request Logging Proxy
+
+To inspect the exact OpenAI-compatible JSON sent by an agent before it reaches
+ds4, run:
+
+```sh
+./bin/openai-request-log-proxy.py --port 8010
+```
+
+Point the client at `http://127.0.0.1:8010/v1`. Headers such as
+`Authorization` are redacted in the log, while the request body is written to
+`run/openai-request-proxy.log`.
+
 OpenAI-compatible request:
 
 ```sh

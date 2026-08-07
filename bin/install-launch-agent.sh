@@ -5,6 +5,24 @@ ROOT=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
 . "$ROOT/config.env"
 
 mkdir -p "$(dirname "$PLIST_PATH")" "$STATE_DIR"
+kv_plist_args=
+if [ -n "$KV_DISK_DIR" ]; then
+    mkdir -p "$KV_DISK_DIR"
+    kv_plist_args="    <string>--kv-disk-dir</string>
+    <string>$KV_DISK_DIR</string>
+    <string>--kv-disk-space-mb</string>
+    <string>$KV_DISK_SPACE_MB</string>
+    <string>--kv-cache-min-tokens</string>
+    <string>$KV_CACHE_MIN_TOKENS</string>
+    <string>--kv-cache-cold-max-tokens</string>
+    <string>$KV_CACHE_COLD_MAX_TOKENS</string>
+    <string>--kv-cache-continued-interval-tokens</string>
+    <string>$KV_CACHE_CONTINUED_INTERVAL_TOKENS</string>
+    <string>--kv-cache-boundary-trim-tokens</string>
+    <string>$KV_CACHE_BOUNDARY_TRIM_TOKENS</string>
+    <string>--kv-cache-boundary-align-tokens</string>
+    <string>$KV_CACHE_BOUNDARY_ALIGN_TOKENS</string>"
+fi
 tmp_plist="$PLIST_PATH.tmp"
 cat >"$tmp_plist" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -34,6 +52,7 @@ cat >"$tmp_plist" <<EOF
     <string>$SERVER_HOST</string>
     <string>--port</string>
     <string>$SERVER_PORT</string>
+$kv_plist_args
   </array>
   <key>WorkingDirectory</key>
   <string>$DS4_DIR</string>
